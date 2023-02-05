@@ -105,13 +105,13 @@ class Comment(db.Model):
 @app.route('/')
 def get_all_posts():
     posts = BlogPost.query.all()
-    return render_template("index.html", all_posts=posts, logged_in=current_user.is_authenticated, current_user=current_user)
+    return render_template("index.html", all_posts=posts, logged_in=current_user.is_authenticated)
 
 
 @app.route('/register', methods=["GET", "POST"])
 def register():
     form = RegisterForm()
-    if request.method == "POST":
+    if form.validate_on_submit():
         email = request.form.get("email")
         name = request.form.get("name")
         password = request.form.get("password")
@@ -138,7 +138,7 @@ def register():
 @app.route('/login', methods=["GET", "POST"])
 def login():
     form = LoginForm()
-    if request.method == "POST":
+    if form.validate_on_submit():
         email = request.form.get("email")
         password = request.form.get("password")
 
@@ -180,7 +180,7 @@ def show_post(post_id):
             db.session.add(new_comment)
             db.session.commit()
 
-    return render_template("post.html", post=requested_post, current_user=current_user, form=comment, logged_in=current_user.is_authenticated)
+    return render_template("post.html", post=requested_post, form=comment, logged_in=current_user.is_authenticated)
 
 
 @app.route("/about")
@@ -227,12 +227,12 @@ def edit_post(post_id):
         post.title = edit_form.title.data
         post.subtitle = edit_form.subtitle.data
         post.img_url = edit_form.img_url.data
-        post.author = edit_form.author.data
+        # post.author = edit_form.author.data
         post.body = edit_form.body.data
         db.session.commit()
         return redirect(url_for("show_post", post_id=post.id))
 
-    return render_template("make-post.html", form=edit_form)
+    return render_template("make-post.html", form=edit_form, is_edit=True, logged_in=current_user.is_authenticated)
 
 
 @app.route("/delete/<int:post_id>")
